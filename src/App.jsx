@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 /* ============================================================
    IAN MUNGWADZI — PROFESSIONAL PORTFOLIO
-   Employer-facing. Restrained. Content-forward.
+   Employer-facing. (no silliness, no memes, no jokes, no personal blog content )
    ============================================================ */
 
 const CSS = `
@@ -400,9 +400,7 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 
 }
 `;
 
-/* ============================================================
-   CONTENT — edit these arrays to update the site
-   ============================================================ */
+
 
 const ABOUT = [
   "I'm a final-year Mechanical Engineering student at Northumbria University and Team Principal of the university's debut Formula Student programme. My work sits at the intersection of engineering design, race-side data analysis, and multidisciplinary team leadership.",
@@ -414,10 +412,10 @@ const WORK = [
   {
     id: "01",
     featured: true,
-    image: "/images/NUFS_Header_Image.jpg",
+    image: "/images/NUFS_Header_Image.png",
     title: "Northumbria Formula Student",
     role: "Team Principal",
-    period: "2025 — Present",
+    period: "September 2025 — September 2026",
     body: [
       "Founding leadership of Northumbria University's debut Formula Student campaign. Responsible for engineering direction, sponsorship acquisition, and operational deliverables across a multidisciplinary team spanning chassis, powertrain, aerodynamics, electronics, and business.",
       "Building the team's technical baseline from scratch — component selection, design reviews, budget modelling, and the sponsorship pipeline needed to fund it. Working towards FSUK competition readiness.",
