@@ -403,9 +403,9 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 
 
 
 const ABOUT = [
-  "I'm a final-year Mechanical Engineering student at Northumbria University and Team Principal of the university's debut Formula Student programme. My work sits at the intersection of engineering design, race-side data analysis, and multidisciplinary team leadership.",
-  "I'm most at home in the loop between simulation and physical validation — CAD in SolidWorks and Fusion 360, structural work in ABAQUS, data pipelines in Python and MATLAB, and setup decisions made at the trackside with telemetry in front of me.",
-  "Targeting graduate race engineering roles for the 2027 intake. Based in Newcastle-upon-Tyne, open to relocating.",
+  "I'm a final-year Mechanical Engineering student at Northumbria University and former Team Principal of the university's debut Formula Student programme. My work sits at the intersection of engineering design, race-side data analysis, and multidisciplinary team leadership.",
+  "I'm most at home in the cycle of simulating and validating results — CAD in SolidWorks and Fusion 360, structural work in ABAQUS, data pipelines in Python and MATLAB, and setup decisions made at the trackside with gathered telemetry in front of me.",
+  "Targeting graduate engineering roles for 2027 intake. Based in Newcastle-upon-Tyne, open to relocating.",
 ];
 
 const WORK = [
@@ -418,7 +418,7 @@ const WORK = [
     period: "September 2025 — September 2026",
     body: [
       "Founding leadership of Northumbria University's debut Formula Student campaign. Responsible for engineering direction, sponsorship acquisition, and operational deliverables across a multidisciplinary team spanning chassis, powertrain, aerodynamics, electronics, and business.",
-      "Building the team's technical baseline from scratch — component selection, design reviews, budget modelling, and the sponsorship pipeline needed to fund it. Working towards FSUK competition readiness.",
+      "Built the team's technical baseline from scratch — component selection, design reviews, budget modelling, and the sponsorship pipeline needed to fund it. Working towards FSUK competition readiness.",
     ],
     tags: ["Team Leadership", "SolidWorks", "Project Management", "Sponsorship"],
   },
@@ -451,10 +451,10 @@ const WORK = [
     image: "/images/papaya-turn-one.jpg",
     title: "Papaya Turn One",
     role: "Co-Founder / Director",
-    period: "2021 — 2025",
+    period: "2021 — Present",
     body: [
       "Co-founded a small motorsport media company and racing team, grown from the QE Motorsport society. Directed brand identity, media output, and early operational strategy.",
-      "Working towards the establishment of the UK's first dedicated student racing team — a longer-term project running alongside Formula Student.",
+      "Working towards the establishment of the UK's first dedicated student racing team — a longer-term project running parallel to Formula Student.",
     ],
     tags: ["Motorsport", "Media", "Strategy"],
   },
@@ -501,7 +501,7 @@ const CAPABILITIES = [
 
 const TIMELINE = [
   {
-    when: "2025 — Present",
+    when: "2024 — 2026",
     title: "Team Principal — Formula Student",
     org: "Northumbria University",
     body: "Leading the university's debut Formula Student campaign end-to-end.",
@@ -522,7 +522,7 @@ const TIMELINE = [
     when: "2021 — 2025",
     title: "Co-Founder / Director",
     org: "Papaya Turn One",
-    body: "Motorsport media company and racing team, grown from the QE Motorsport society.",
+    body: "Motorsport media company and racing team, grown from the QE Motorsport society. Media operations on hold whislt racing operations are ongoing.",
   },
   {
     when: "2021 — 2022",
@@ -615,7 +615,7 @@ export default function Portfolio() {
                 <h1>Ian Mungwadzi</h1>
                 <p className="role">
                   <strong>Mechanical engineering</strong>, final year at Northumbria University.
-                  Team Principal of Northumbria's debut Formula Student programme. Design, simulation,
+                  Former Team Principal of Northumbria's debut Formula Student programme. Design, simulation,
                   and race-side data analysis.
                 </p>
                 <div className="meta">
@@ -652,7 +652,7 @@ export default function Portfolio() {
                       <dd>Final year, BEng Mechanical Engineering</dd>
                     </div>
                     <div>
-                      <dt>Leading</dt>
+                      <dt>Formerly Leading</dt>
                       <dd>Northumbria Formula Student</dd>
                     </div>
                     <div>
@@ -775,7 +775,7 @@ export default function Portfolio() {
                     and the policy responses they invite.
                   </p>
                 </div>
-                <a href="#" className="cta" onClick={(e) => e.preventDefault()}>Read (PDF) →</a>
+                <a href="/writing/a-war-by-any-other-name.pdf" className="cta" target="_blank" rel="noreferrer">Read Draft (PDF) →</a>
               </div>
             </Reveal>
           </div>
@@ -787,7 +787,7 @@ export default function Portfolio() {
             <Reveal>
               <h2>Let's <span className="accent">talk.</span></h2>
               <p className="contact-body">
-                I'm actively looking for graduate race engineering opportunities for the 2027 intake,
+                I'm actively looking for graduate engineering opportunities for 2027 intake,
                 and open to conversations about internships, projects, or anything adjacent.
                 The quickest way to reach me is by email.
               </p>
