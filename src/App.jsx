@@ -1,14 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Lenis from "lenis";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import { useGesture } from "@use-gesture/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /* ============================================================
-   IAN MUNGWADZI — PORTFOLIO (DARK / CUTTING-MAT)
-   Full commit: dark theme, cutting-mat → grid transition,
-   Lenis smooth scroll, GSAP-choreographed section reveals.
+   IAN MUNGWADZI — PORTFOLIO (DARK / CUTTING-MAT / CANVAS)
+   The Work section is a pannable/zoomable 2D workshop.
+   Everything else scrolls normally.
    ============================================================ */
 
 const CSS = `
@@ -40,6 +41,7 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
+html.modal-open { overflow: hidden; height: 100vh; }
 
 .pro-root {
   background: var(--bg);
@@ -66,7 +68,6 @@ html.lenis, html.lenis body { height: auto; }
     linear-gradient(var(--grid-fine) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-fine) 1px, transparent 1px);
   background-size: 240px 240px, 240px 240px, 48px 48px, 48px 48px;
-  background-position: 0 0, 0 0, 0 0, 0 0;
 }
 
 .bg-mat {
@@ -76,7 +77,6 @@ html.lenis, html.lenis body { height: auto; }
 }
 .bg-mat svg { width: 100%; height: 100%; display: block; }
 
-/* Corner registration mark */
 .reg-mark {
   position: fixed; z-index: 2; pointer-events: none;
   width: 44px; height: 44px;
@@ -93,7 +93,6 @@ html.lenis, html.lenis body { height: auto; }
   .reg-mark { display: none; }
 }
 
-/* Scroll progress indicator */
 .scroll-progress {
   position: fixed; top: 0; left: 0; right: 0; height: 2px;
   z-index: 60; background: transparent; pointer-events: none;
@@ -104,10 +103,8 @@ html.lenis, html.lenis body { height: auto; }
   box-shadow: 0 0 8px var(--accent);
 }
 
-/* ---------- Content wrapper ---------- */
 .content { position: relative; z-index: 10; }
 
-/* ---------- Utility ---------- */
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
 .wrap-narrow { max-width: 780px; margin: 0 auto; padding: 0 40px; }
 
@@ -116,11 +113,8 @@ html.lenis, html.lenis body { height: auto; }
 }
 
 .eyebrow {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-3);
 }
 .eyebrow .dot {
   display: inline-block; width: 6px; height: 6px;
@@ -216,11 +210,8 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 
 
 .hero .role {
   font-size: clamp(17px, 2vw, 21px);
-  color: var(--ink-2);
-  font-weight: 400;
-  margin-bottom: 40px;
-  max-width: 640px;
-  line-height: 1.55;
+  color: var(--ink-2); font-weight: 400;
+  margin-bottom: 40px; max-width: 640px; line-height: 1.55;
   opacity: 0;
 }
 .hero .role strong { color: var(--ink); font-weight: 600; }
@@ -242,8 +233,7 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 
   aspect-ratio: 4 / 5;
   background: var(--bg-alt);
   border: 1px solid var(--rule-strong);
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
   opacity: 0;
 }
 .hero-portrait img {
@@ -285,14 +275,11 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 
 }
 .section-head h2 {
   font-size: clamp(30px, 4.5vw, 46px);
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1;
+  font-weight: 600; letter-spacing: -0.025em; line-height: 1;
 }
 .section-head h2 .word-wrap { display: inline-block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
 .section-head h2 .word {
-  display: inline-block; transform: translateY(105%);
-  will-change: transform;
+  display: inline-block; transform: translateY(105%); will-change: transform;
 }
 .section-head .rule {
   height: 1px; background: var(--rule-strong);
@@ -307,13 +294,10 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 
 }
 
 /* ---------- About ---------- */
-.about-grid {
-  display: grid; grid-template-columns: 1fr 320px; gap: 80px;
-}
+.about-grid { display: grid; grid-template-columns: 1fr 320px; gap: 80px; }
 .about-body p {
   font-size: 18px; line-height: 1.65; color: var(--ink);
-  margin-bottom: 22px; max-width: 62ch;
-  font-weight: 400;
+  margin-bottom: 22px; max-width: 62ch; font-weight: 400;
 }
 .about-body p:last-child { margin-bottom: 0; }
 .about-aside {
@@ -332,24 +316,273 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 
   .about-aside { border-left: none; border-top: 1px solid var(--rule); padding: 28px 0 0; }
 }
 
-/* ---------- Work ---------- */
-.work-list { display: grid; gap: 100px; }
-.work-item { display: grid; grid-template-columns: 380px 1fr; gap: 60px; align-items: start; }
-.work-item.featured { grid-template-columns: 1fr; gap: 40px; }
+/* ============================================================
+   WORK CANVAS — the pannable/zoomable workshop
+   ============================================================ */
 
+.canvas-container {
+  position: relative;
+  opacity: 0;
+}
+.canvas-container.ready { opacity: 1; transition: opacity 0.6s ease; }
+
+.canvas-toolbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px; flex-wrap: wrap; gap: 12px;
+}
+.canvas-caption {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+  color: var(--ink-3); text-transform: uppercase;
+}
+.canvas-caption .k { color: var(--accent); }
+.canvas-toolbar .modes {
+  display: flex; gap: 0;
+}
+.canvas-toolbar .modes button {
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  color: var(--ink-2);
+  padding: 6px 12px;
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  border-right-width: 0;
+}
+.canvas-toolbar .modes button:last-child { border-right-width: 1px; }
+.canvas-toolbar .modes button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+.canvas-toolbar .modes button:hover:not(.active) {
+  color: var(--ink);
+  border-color: var(--ink-3);
+}
+
+.canvas-viewport {
+  position: relative;
+  width: 100%;
+  height: 720px;
+  border: 1px solid var(--rule-strong);
+  overflow: hidden;
+  background: var(--bg-alt);
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.canvas-viewport.grabbing { cursor: grabbing; }
+
+@media (max-width: 900px) { .canvas-viewport { height: 620px; } }
+@media (max-width: 620px) { .canvas-viewport { height: 520px; } }
+
+.canvas-plane {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  transform-origin: 0 0;
+  will-change: transform;
+  background-image:
+    linear-gradient(rgba(240,237,229,0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240,237,229,0.09) 1px, transparent 1px),
+    linear-gradient(rgba(240,237,229,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240,237,229,0.04) 1px, transparent 1px);
+  background-size: 240px 240px, 240px 240px, 48px 48px, 48px 48px;
+  background-position: 0 0;
+}
+
+.canvas-plane::before,
+.canvas-plane::after {
+  content: '';
+  position: absolute;
+  width: 1200px; height: 1px;
+  background: rgba(240,237,229,0.06);
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+.canvas-plane::before {
+  left: -600px; top: -400px;
+  transform: rotate(15deg);
+}
+.canvas-plane::after {
+  left: -600px; top: -400px;
+  transform: rotate(45deg);
+}
+
+.canvas-origin {
+  position: absolute;
+  left: 0; top: 0;
+  width: 20px; height: 20px;
+  border-left: 1px solid rgba(229,101,28,0.5);
+  border-top: 1px solid rgba(229,101,28,0.5);
+  pointer-events: none;
+}
+.canvas-origin::after {
+  content: '0,0'; position: absolute;
+  top: 4px; left: 6px;
+  font-family: var(--mono); font-size: 9px;
+  color: rgba(229,101,28,0.7); letter-spacing: 0.1em;
+}
+
+.canvas-tile {
+  position: absolute;
+  background: var(--bg-elev);
+  border: 1px solid var(--rule-strong);
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: var(--ink);
+  font-family: var(--body);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 340px;
+  overflow: hidden;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.canvas-tile.featured { width: 500px; }
+.canvas-tile:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(229,101,28,0.08);
+}
+.canvas-tile:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(229,101,28,0.4);
+}
+
+.tile-image {
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule);
+}
+.tile-image img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.tile-content { padding: 16px 18px 18px; }
+.tile-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
+.tile-meta .id { color: var(--accent); }
+.tile-content h3 {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+.canvas-tile.featured .tile-content h3 { font-size: 24px; }
+.tile-role {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  letter-spacing: 0.05em;
+}
+
+/* Corner marks around tiles (crop marks) */
+.canvas-tile::before,
+.canvas-tile::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.canvas-tile::before {
+  top: -6px; left: -6px;
+  border-top: 1px solid var(--accent);
+  border-left: 1px solid var(--accent);
+}
+.canvas-tile::after {
+  bottom: -6px; right: -6px;
+  border-bottom: 1px solid var(--accent);
+  border-right: 1px solid var(--accent);
+}
+
+/* Canvas controls overlay */
+.canvas-controls {
+  position: absolute;
+  bottom: 16px; right: 16px;
+  display: flex; gap: 8px;
+  z-index: 10;
+}
+.canvas-controls button {
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  padding: 8px 12px;
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  min-width: 34px;
+}
+.canvas-controls button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.canvas-controls .zoom-group { display: flex; gap: 0; }
+.canvas-controls .zoom-group button {
+  border-right-width: 0;
+}
+.canvas-controls .zoom-group button:last-child {
+  border-right-width: 1px;
+}
+
+.canvas-hint {
+  position: absolute;
+  top: 16px; left: 16px;
+  z-index: 10;
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--ink-2);
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  max-width: 90%;
+}
+.canvas-hint.hidden { opacity: 0; }
+.canvas-hint .icn { color: var(--accent); margin-right: 8px; }
+
+.canvas-scale {
+  position: absolute;
+  bottom: 16px; left: 16px;
+  z-index: 10;
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  padding: 6px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+.canvas-scale .v { color: var(--ink); }
+
+/* ---------- Fallback list view ---------- */
+.work-list { display: grid; gap: 60px; }
+.work-item { display: grid; grid-template-columns: 340px 1fr; gap: 50px; align-items: start; }
+.work-item.featured { grid-template-columns: 1fr; gap: 30px; }
 .work-media {
   aspect-ratio: 4 / 3;
   background: var(--bg-alt); border: 1px solid var(--rule);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
-  color: var(--ink-3); text-align: center; padding: 20px;
-  position: relative; overflow: hidden;
+  overflow: hidden;
 }
-.work-media img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
+.work-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .work-item.featured .work-media { aspect-ratio: 21 / 9; }
-
 .work-body h3 {
   font-size: 26px; margin-bottom: 8px; font-weight: 600;
   letter-spacing: -0.015em;
@@ -373,10 +606,112 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 
   color: var(--ink-2); border: 1px solid var(--rule-strong);
   padding: 5px 11px;
 }
-
 @media (max-width: 820px) {
-  .work-list { gap: 70px; }
+  .work-list { gap: 50px; }
   .work-item { grid-template-columns: 1fr; gap: 24px; }
+}
+
+/* ============================================================
+   PROJECT MODAL
+   ============================================================ */
+
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10, 9, 8, 0.88);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  animation: overlay-in 0.25s ease forwards;
+}
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: var(--bg);
+  border: 1px solid var(--rule-strong);
+  max-width: 960px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: modal-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  transform: translateY(20px);
+  opacity: 0;
+}
+@keyframes modal-in {
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  position: sticky; top: 0; z-index: 5;
+  background: rgba(10, 9, 8, 0.9);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--rule);
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+  color: var(--ink-3); text-transform: uppercase;
+}
+.modal-header .id { color: var(--accent); }
+
+.modal-close {
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  width: 32px; height: 32px;
+  cursor: pointer;
+  font-family: var(--mono); font-size: 14px;
+  line-height: 1;
+  transition: border-color 0.15s ease, color 0.15s ease;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { border-color: var(--accent); color: var(--accent); }
+
+.modal-image {
+  aspect-ratio: 21/9;
+  overflow: hidden;
+  border-bottom: 1px solid var(--rule);
+}
+.modal-image img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+
+.modal-content { padding: 48px; }
+.modal-content .work-meta {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+  color: var(--ink-3); text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.modal-content .work-meta .role { color: var(--accent); }
+.modal-content h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  margin-bottom: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.modal-content p {
+  color: var(--ink-2);
+  font-size: 16px;
+  line-height: 1.7;
+  margin-bottom: 18px;
+  max-width: 66ch;
+}
+.modal-content .work-tags {
+  margin-top: 32px; padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+
+@media (max-width: 620px) {
+  .modal-content { padding: 32px 24px; }
+  .modal-header { padding: 12px 16px; }
 }
 
 /* ---------- Capabilities ---------- */
@@ -405,11 +740,6 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 
 
 /* ---------- Timeline ---------- */
 .timeline { position: relative; padding-left: 20px; }
-.timeline::before {
-  content: ''; position: absolute; left: 6px; top: 0; bottom: 0;
-  width: 1px; background: var(--rule-strong);
-  transform: scaleY(0); transform-origin: top;
-}
 .tl-item {
   display: grid; grid-template-columns: 160px 1fr;
   gap: 48px; padding: 28px 0; border-top: 1px solid var(--rule);
@@ -526,8 +856,9 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 
   .hero-name .char { transform: none; }
   .section-head h2 .word { transform: none; }
   .contact h2 .word { transform: none; }
-  .section-head .num, .hero .eyebrow, .status-pill, .hero .role, .hero .meta, .hero-portrait, .section-head .rule, .tl-item::before, .timeline::before { opacity: 1; transform: none !important; }
+  .section-head .num, .hero .eyebrow, .status-pill, .hero .role, .hero .meta, .hero-portrait, .section-head .rule, .tl-item::before, .canvas-container, .canvas-tile { opacity: 1; transform: none !important; }
   .status-pill .pulse { animation: none; }
+  .modal, .modal-overlay { animation: none; opacity: 1; transform: none; }
 }
 `;
 
@@ -546,6 +877,8 @@ const WORK = [
     id: "01",
     featured: true,
     image: "/images/formula-student.jpg",
+    canvasX: 0,
+    canvasY: 0,
     title: "Northumbria Formula Student",
     role: "Team Principal",
     period: "2025 — Present",
@@ -558,6 +891,8 @@ const WORK = [
   {
     id: "02",
     image: "/images/rap-riders.jpg",
+    canvasX: 620,
+    canvasY: -80,
     title: "RAP Riders Academy",
     role: "Pit Crew / Race Engineer",
     period: "2024",
@@ -570,6 +905,8 @@ const WORK = [
   {
     id: "03",
     image: "/images/lm-wind-power.jpg",
+    canvasX: -520,
+    canvasY: 360,
     title: "LM Wind Power × GE Renewable Energy",
     role: "Design Engineer Intern",
     period: "2021 — 2022",
@@ -582,6 +919,8 @@ const WORK = [
   {
     id: "04",
     image: "/images/papaya-turn-one.jpg",
+    canvasX: 560,
+    canvasY: 380,
     title: "Papaya Turn One",
     role: "Co-Founder / Director",
     period: "2021 — 2025",
@@ -642,13 +981,13 @@ const TIMELINE = [
 ];
 
 /* ============================================================
-   TEXT-SPLITTING HELPERS
+   HELPERS
    ============================================================ */
 
-function SplitChars({ text, className = "" }) {
+function SplitChars({ text }) {
   const words = text.split(" ");
   return (
-    <span className={className}>
+    <>
       {words.map((word, wi) => (
         <span className="word-wrap" key={wi}>
           {word.split("").map((c, ci) => (
@@ -657,7 +996,7 @@ function SplitChars({ text, className = "" }) {
           {wi < words.length - 1 && <span className="char">&nbsp;</span>}
         </span>
       ))}
-    </span>
+    </>
   );
 }
 
@@ -675,6 +1014,237 @@ function SplitWords({ text }) {
 }
 
 /* ============================================================
+   WORK CANVAS COMPONENT
+   ============================================================ */
+
+const MIN_SCALE = 0.4;
+const MAX_SCALE = 2;
+const ZOOM_STEP = 1.25;
+
+function computeInitialTransform(viewport) {
+  const isSmall = window.innerWidth < 720;
+  return {
+    x: viewport.offsetWidth / 2,
+    y: viewport.offsetHeight / 2,
+    scale: isSmall ? 0.45 : 0.7,
+  };
+}
+
+function WorkCanvas({ projects, onOpenProject }) {
+  const [transform, setTransform] = useState({ x: 400, y: 300, scale: 0.7 });
+  const [hintVisible, setHintVisible] = useState(true);
+  const [grabbing, setGrabbing] = useState(false);
+  const viewportRef = useRef(null);
+  const containerRef = useRef(null);
+  const readyRef = useRef(false);
+
+  // Initialize view once viewport is measured
+  useEffect(() => {
+    if (!viewportRef.current) return;
+    setTransform(computeInitialTransform(viewportRef.current));
+    readyRef.current = true;
+    if (containerRef.current) containerRef.current.classList.add("ready");
+  }, []);
+
+  // Reveal tiles on scroll into view
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      gsap.set(".canvas-tile", { opacity: 1 });
+      return;
+    }
+    const st = ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: "top 75%",
+      once: true,
+      onEnter: () => {
+        gsap.to(".canvas-tile", {
+          opacity: 1,
+          duration: 0.6,
+          stagger: 0.12,
+          ease: "power2.out",
+          delay: 0.2,
+        });
+      },
+    });
+    return () => st.kill();
+  }, []);
+
+  // Hide hint after first interaction
+  const dismissHint = () => setHintVisible(false);
+
+  // Gesture handling
+  useGesture(
+    {
+      onDragStart: () => {
+        setGrabbing(true);
+        dismissHint();
+      },
+      onDrag: ({ movement: [mx, my], memo }) => {
+        const start = memo || { x: transform.x, y: transform.y };
+        setTransform((t) => ({ ...t, x: start.x + mx, y: start.y + my }));
+        return start;
+      },
+      onDragEnd: () => setGrabbing(false),
+      onPinch: ({ offset: [s] }) => {
+        dismissHint();
+        setTransform((t) => ({ ...t, scale: s }));
+      },
+      onWheel: ({ delta: [, dy], event }) => {
+        if (event.cancelable) event.preventDefault();
+        setTransform((t) => ({
+          ...t,
+          scale: Math.max(MIN_SCALE, Math.min(MAX_SCALE, t.scale - dy * 0.0015)),
+        }));
+      },
+    },
+    {
+      target: viewportRef,
+      eventOptions: { passive: false },
+      drag: { filterTaps: true, threshold: 3 },
+      pinch: { scaleBounds: { min: MIN_SCALE, max: MAX_SCALE }, from: () => [transform.scale, 0] },
+    }
+  );
+
+  const resetView = () => {
+    if (!viewportRef.current) return;
+    setTransform(computeInitialTransform(viewportRef.current));
+  };
+
+  const zoomIn = () =>
+    setTransform((t) => ({ ...t, scale: Math.min(MAX_SCALE, t.scale * ZOOM_STEP) }));
+  const zoomOut = () =>
+    setTransform((t) => ({ ...t, scale: Math.max(MIN_SCALE, t.scale / ZOOM_STEP) }));
+
+  return (
+    <div className="canvas-container" ref={containerRef}>
+      <div className="canvas-toolbar">
+        <div className="canvas-caption">
+          <span className="k">§</span> Workshop view · {projects.length} projects
+        </div>
+      </div>
+
+      <div
+        className={`canvas-viewport ${grabbing ? "grabbing" : ""}`}
+        ref={viewportRef}
+        data-lenis-prevent
+      >
+        <div
+          className={`canvas-hint ${!hintVisible ? "hidden" : ""}`}
+          aria-hidden="true"
+        >
+          <span className="icn">◇</span>
+          Drag to pan · Pinch or scroll to zoom · Click a tile for details
+        </div>
+
+        <div className="canvas-scale">
+          Scale <span className="v">{(transform.scale * 100).toFixed(0)}%</span>
+        </div>
+
+        <div className="canvas-controls">
+          <button onClick={resetView} title="Reset view">RESET</button>
+          <div className="zoom-group">
+            <button onClick={zoomOut} aria-label="Zoom out">−</button>
+            <button onClick={zoomIn} aria-label="Zoom in">+</button>
+          </div>
+        </div>
+
+        <div
+          className="canvas-plane"
+          style={{
+            transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale(${transform.scale})`,
+          }}
+        >
+          <div className="canvas-origin" />
+          {projects.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className={`canvas-tile ${p.featured ? "featured" : ""}`}
+              style={{
+                left: `${p.canvasX}px`,
+                top: `${p.canvasY}px`,
+                transform: "translate(-50%, -50%)",
+              }}
+              onClick={() => onOpenProject(p)}
+              aria-label={`Open project: ${p.title}`}
+            >
+              <div className="tile-image">
+                <img src={p.image} alt="" />
+              </div>
+              <div className="tile-content">
+                <div className="tile-meta">
+                  <span className="id">N°{p.id}</span>
+                  <span>{p.period}</span>
+                </div>
+                <h3>{p.title}</h3>
+                <div className="tile-role">{p.role}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   PROJECT MODAL
+   ============================================================ */
+
+function ProjectModal({ project, onClose }) {
+  useEffect(() => {
+    if (!project) return;
+    document.documentElement.classList.add("modal-open");
+    const onKey = (e) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.documentElement.classList.remove("modal-open");
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [project, onClose]);
+
+  if (!project) return null;
+
+  return (
+    <div
+      className="modal-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <span>
+            <span className="id">N°{project.id}</span> · {project.role} · {project.period}
+          </span>
+          <button className="modal-close" onClick={onClose} aria-label="Close">
+            ✕
+          </button>
+        </div>
+        <div className="modal-image">
+          <img src={project.image} alt={project.title} />
+        </div>
+        <div className="modal-content">
+          <h2 id="modal-title">{project.title}</h2>
+          {project.body.map((p, i) => (
+            <p key={i}>{p}</p>
+          ))}
+          <div className="work-tags">
+            {project.tags.map((t) => (
+              <span className="work-tag" key={t}>
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
    MAIN COMPONENT
    ============================================================ */
 
@@ -683,11 +1253,11 @@ export default function Portfolio() {
   const navRef = useRef(null);
   const matRef = useRef(null);
   const progressRef = useRef(null);
+  const [openProject, setOpenProject] = useState(null);
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    /* ---------- Lenis smooth scroll ---------- */
     let lenis;
     if (!reduce) {
       lenis = new Lenis({
@@ -700,24 +1270,18 @@ export default function Portfolio() {
       gsap.ticker.lagSmoothing(0);
     }
 
-    /* ---------- Nav shrink on scroll ---------- */
     const onScroll = () => {
       if (navRef.current) navRef.current.classList.toggle("scrolled", window.scrollY > 40);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
 
-    /* ---------- Hero reveal timeline ---------- */
+    // Hero reveal
     if (!reduce) {
       const tl = gsap.timeline({ delay: 0.2 });
       tl.to(".hero .eyebrow", { opacity: 1, duration: 0.6, ease: "power2.out" })
         .to(".status-pill", { opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.3")
-        .to(".hero-name .char", {
-          y: 0,
-          duration: 0.9,
-          stagger: 0.025,
-          ease: "expo.out",
-        }, "-=0.2")
+        .to(".hero-name .char", { y: 0, duration: 0.9, stagger: 0.025, ease: "expo.out" }, "-=0.2")
         .to(".hero .role", { opacity: 1, duration: 0.7, ease: "power2.out" }, "-=0.5")
         .to(".hero .meta", { opacity: 1, duration: 0.6, ease: "power2.out" }, "-=0.4")
         .to(".hero-portrait", { opacity: 1, duration: 1, ease: "power2.out" }, "-=0.8");
@@ -725,7 +1289,7 @@ export default function Portfolio() {
       gsap.set(".hero-name .char, .hero .eyebrow, .status-pill, .hero .role, .hero .meta, .hero-portrait", { opacity: 1, y: 0 });
     }
 
-    /* ---------- Section header reveals ---------- */
+    // Section header reveals
     document.querySelectorAll(".section-head").forEach((head) => {
       const words = head.querySelectorAll("h2 .word");
       const num = head.querySelector(".num");
@@ -744,120 +1308,60 @@ export default function Portfolio() {
         },
       });
       tl.to(num, { opacity: 1, duration: 0.5, ease: "power2.out" })
-        .to(words, {
-          y: 0,
-          duration: 0.85,
-          stagger: 0.08,
-          ease: "expo.out",
-        }, "-=0.35")
+        .to(words, { y: 0, duration: 0.85, stagger: 0.08, ease: "expo.out" }, "-=0.35")
         .to(rule, { scaleX: 1, duration: 0.8, ease: "power2.out" }, "-=0.6");
     });
 
-    /* ---------- Contact heading ---------- */
+    // Contact heading
     if (!reduce) {
       gsap.to(".contact h2 .word", {
-        y: 0,
-        duration: 0.95,
-        stagger: 0.08,
-        ease: "expo.out",
-        scrollTrigger: {
-          trigger: ".contact h2",
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
+        y: 0, duration: 0.95, stagger: 0.08, ease: "expo.out",
+        scrollTrigger: { trigger: ".contact h2", start: "top 80%", toggleActions: "play none none reverse" },
       });
     } else {
       gsap.set(".contact h2 .word", { y: 0 });
     }
 
-    /* ---------- Timeline draw ---------- */
+    // Timeline items reveal
     if (!reduce) {
-      gsap.to(".timeline::before", { scaleY: 1, ease: "none" });
-      gsap.to(".timeline", {
-        "--tl-scale": 1,
-        scrollTrigger: {
-          trigger: ".timeline",
-          start: "top 70%",
-          end: "bottom 70%",
-          scrub: 0.5,
-          onUpdate: (self) => {
-            const line = document.querySelector(".timeline");
-            if (line) line.style.setProperty("--tl-progress", self.progress);
-          },
-        },
-      });
-      // Diamond markers pop in
-      gsap.utils.toArray(".tl-item").forEach((item, i) => {
-        gsap.fromTo(
-          item,
+      gsap.utils.toArray(".tl-item").forEach((item) => {
+        gsap.fromTo(item,
           { opacity: 0, y: 20 },
           {
-            opacity: 1,
-            y: 0,
-            duration: 0.7,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: item,
-              start: "top 85%",
-              toggleActions: "play none none reverse",
-            },
+            opacity: 1, y: 0, duration: 0.7, ease: "power2.out",
+            scrollTrigger: { trigger: item, start: "top 85%", toggleActions: "play none none reverse" },
           }
         );
-        gsap.to(item, {
-          "--marker-scale": 1,
-          scrollTrigger: {
-            trigger: item,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
+        gsap.to(item.querySelector("::before"), {
+          scrollTrigger: { trigger: item, start: "top 80%", toggleActions: "play none none reverse" },
         });
       });
     }
 
-    /* ---------- Cutting-mat detail fade on scroll ---------- */
+    // Cutting mat fade
     if (matRef.current && !reduce) {
       gsap.to(matRef.current, {
-        opacity: 0,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: 0.5,
-        },
+        opacity: 0, ease: "none",
+        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.5 },
       });
     }
 
-    /* ---------- Scroll progress bar ---------- */
+    // Scroll progress
     if (progressRef.current) {
       gsap.to(progressRef.current, {
-        scaleX: 1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: document.body,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 0.1,
-        },
+        scaleX: 1, ease: "none",
+        scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.1 },
       });
     }
 
-    /* ---------- Generic content reveals ---------- */
+    // Generic reveals
     if (!reduce) {
       gsap.utils.toArray(".reveal-up").forEach((el) => {
-        gsap.fromTo(
-          el,
+        gsap.fromTo(el,
           { opacity: 0, y: 24 },
           {
-            opacity: 1,
-            y: 0,
-            duration: 0.9,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: el,
-              start: "top 88%",
-              toggleActions: "play none none reverse",
-            },
+            opacity: 1, y: 0, duration: 0.9, ease: "power2.out",
+            scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
           }
         );
       });
@@ -865,7 +1369,6 @@ export default function Portfolio() {
       gsap.set(".reveal-up", { opacity: 1, y: 0 });
     }
 
-    /* ---------- Cleanup ---------- */
     return () => {
       window.removeEventListener("scroll", onScroll);
       ScrollTrigger.getAll().forEach((st) => st.kill());
@@ -878,11 +1381,9 @@ export default function Portfolio() {
     <div className="pro-root" ref={rootRef}>
       <style>{CSS}</style>
 
-      {/* Fixed background layers */}
       <div className="bg-grid" />
       <div className="bg-mat" ref={matRef}>
         <svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-          {/* Diagonal fan from top-left corner */}
           <g stroke="rgba(240,237,229,0.13)" strokeWidth="1" fill="none">
             <line x1="0" y1="0" x2="1600" y2="428" />
             <line x1="0" y1="0" x2="1600" y2="924" />
@@ -890,13 +1391,11 @@ export default function Portfolio() {
             <line x1="0" y1="0" x2="577" y2="1000" />
             <line x1="0" y1="0" x2="268" y2="1000" />
           </g>
-          {/* Diagonal fan from top-right corner (fainter) */}
           <g stroke="rgba(240,237,229,0.07)" strokeWidth="1" fill="none">
             <line x1="1600" y1="0" x2="0" y2="428" />
             <line x1="1600" y1="0" x2="600" y2="1000" />
             <line x1="1600" y1="0" x2="1023" y2="1000" />
           </g>
-          {/* Top ruler tick marks */}
           <g stroke="rgba(240,237,229,0.28)" strokeWidth="1">
             {Array.from({ length: 33 }).map((_, i) => {
               const x = i * 48;
@@ -904,7 +1403,6 @@ export default function Portfolio() {
               return <line key={i} x1={x} y1="0" x2={x} y2={h} />;
             })}
           </g>
-          {/* Left ruler tick marks */}
           <g stroke="rgba(240,237,229,0.28)" strokeWidth="1">
             {Array.from({ length: 21 }).map((_, i) => {
               const y = i * 48;
@@ -912,23 +1410,19 @@ export default function Portfolio() {
               return <line key={i} x1="0" y1={y} x2={w} y2={y} />;
             })}
           </g>
-          {/* Corner label */}
           <text x="24" y="42" fontFamily="'JetBrains Mono', monospace" fontSize="10" fill="rgba(240,237,229,0.4)" letterSpacing="1.5">
             A1 / SCALE 1:1
           </text>
         </svg>
       </div>
 
-      {/* Registration marks */}
       <div className="reg-mark reg-tl">01</div>
       <div className="reg-mark reg-tr">A / EN-GB</div>
       <div className="reg-mark reg-bl">v2.0</div>
       <div className="reg-mark reg-br">© 2026</div>
 
-      {/* Scroll progress bar */}
       <div className="scroll-progress"><div className="bar" ref={progressRef} /></div>
 
-      {/* Nav */}
       <nav className="nav" ref={navRef}>
         <a href="#top" className="nav-logo">
           <span className="initials">IM</span>&nbsp;&nbsp;Ian Mungwadzi
@@ -944,7 +1438,6 @@ export default function Portfolio() {
       </nav>
 
       <main className="content" id="top">
-        {/* Hero */}
         <header className="hero">
           <div className="wrap">
             <div className="hero-grid">
@@ -977,7 +1470,6 @@ export default function Portfolio() {
           </div>
         </header>
 
-        {/* About */}
         <section className="section" id="about">
           <div className="wrap">
             <div className="section-head">
@@ -1001,7 +1493,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* Work */}
         <section className="section" id="work">
           <div className="wrap">
             <div className="section-head">
@@ -1009,31 +1500,10 @@ export default function Portfolio() {
               <h2><SplitWords text="Selected work" /></h2>
               <span className="rule" />
             </div>
-            <div className="work-list">
-              {WORK.map((w) => (
-                <article className={`work-item reveal-up ${w.featured ? "featured" : ""}`} key={w.id}>
-                  <div className="work-media">
-                    <img src={w.image} alt={w.title} />
-                  </div>
-                  <div className="work-body">
-                    <div className="work-meta">
-                      <span>N°{w.id}</span>
-                      <span className="role">{w.role}</span>
-                      <span>{w.period}</span>
-                    </div>
-                    <h3>{w.title}</h3>
-                    {w.body.map((p, i) => <p key={i}>{p}</p>)}
-                    <div className="work-tags">
-                      {w.tags.map((t) => <span className="work-tag" key={t}>{t}</span>)}
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <WorkCanvas projects={WORK} onOpenProject={setOpenProject} />
           </div>
         </section>
 
-        {/* Capabilities */}
         <section className="section" id="capabilities">
           <div className="wrap">
             <div className="section-head">
@@ -1059,7 +1529,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* Experience */}
         <section className="section" id="experience">
           <div className="wrap">
             <div className="section-head">
@@ -1082,7 +1551,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* Writing */}
         <section className="section" id="writing">
           <div className="wrap">
             <div className="section-head">
@@ -1105,7 +1573,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* Contact */}
         <section className="contact" id="contact">
           <div className="contact-inner">
             <h2>
@@ -1141,7 +1608,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="footer">
           <div className="wrap">
             <div className="footer-inner">
@@ -1157,6 +1623,8 @@ export default function Portfolio() {
           </div>
         </footer>
       </main>
+
+      <ProjectModal project={openProject} onClose={() => setOpenProject(null)} />
     </div>
   );
 }
