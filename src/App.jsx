@@ -876,7 +876,7 @@ const WORK = [
   {
     id: "01",
     featured: true,
-    image: "/images/formula-student.jpg",
+    image: "/images/formula-student.png",
     canvasX: 0,
     canvasY: 0,
     title: "Northumbria Formula Student",
@@ -904,7 +904,7 @@ const WORK = [
   },
   {
     id: "03",
-    image: "/images/lm-wind-power.jpg",
+    image: "/images/lm-wind-power.jpeg",
     canvasX: -520,
     canvasY: 360,
     title: "LM Wind Power × GE Renewable Energy",
