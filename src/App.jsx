@@ -197,7 +197,7 @@ h1, h2, h3, h4, h5 { font-family: var(--display); font-weight: 600; letter-spaci
 .canvas-tile.featured { width: 500px; }
 .canvas-tile:hover { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(229,101,28,0.08); }
 .canvas-tile:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(229,101,28,0.4); }
-.tile-image { aspect-ratio: 16/9; overflow: hidden; background: var(--bg); border-bottom: 1px solid var(--rule); }
+.tile-image { aspect-ratio: var(--aspect, 16/9); overflow: hidden; background: var(--bg); border-bottom: 1px solid var(--rule); }
 .tile-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .tile-content { padding: 16px 18px 18px; }
 .tile-meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--ink-3); text-transform: uppercase; margin-bottom: 8px; display: flex; gap: 12px; flex-wrap: wrap; }
@@ -416,6 +416,7 @@ const WORK = [
   {
     id: "01", featured: true, image: "/images/formula-student.png",
     canvasX: 0, canvasY: 0,
+    aspect: "16 / 9",
     title: "Northumbria Formula Student", role: "Team Principal", period: "2024 — 2026",
     body: [
       "Founding leadership of Northumbria University's debut Formula Student campaign. Responsible for engineering direction, sponsorship acquisition, and operational deliverables across a multidisciplinary team spanning chassis, powertrain, aerodynamics, electronics, and business.",
@@ -424,7 +425,9 @@ const WORK = [
     tags: ["Team Leadership", "SolidWorks", "Project Management", "Sponsorship"],
   },
   {
-    id: "02", image: "/images/rap-riders.jpg", canvasX: 620, canvasY: -80,
+    id: "02", image: "/images/rap-riders.jpg",
+    canvasX: 620, canvasY: -80,
+    aspect: "16 / 9",
     title: "RAP Riders Academy", role: "Pit Crew / Race Engineer", period: "2024",
     body: [
       "Supported rider Hudson Kai Cooper across the Teesside legs of the FIM MiniGP and FreeTech Endurance Junior Talent Cup.",
@@ -433,7 +436,9 @@ const WORK = [
     tags: ["Telemetry", "Data Analysis", "Race Setup", "Live Ops"],
   },
   {
-    id: "03", image: "/images/lm-wind-power.jpeg", canvasX: -520, canvasY: 360,
+    id: "03", image: "/images/lm-wind-power.jpeg",
+    canvasX: -520, canvasY: 360,
+    aspect: "3 / 4",
     title: "LM Wind Power × GE Renewable Energy", role: "Design Engineer Intern", period: "2021 — 2022",
     body: [
       "Remote design engineering placement delivered through the Industrial Cadets programme, culminating in a Gold award.",
@@ -442,7 +447,9 @@ const WORK = [
     tags: ["FEA", "Materials", "Simulation", "Technical Communication"],
   },
   {
-    id: "04", image: "/images/papaya-turn-one.jpg", canvasX: 560, canvasY: 380,
+    id: "04", image: "/images/papaya-turn-one.jpg",
+    canvasX: 560, canvasY: 380,
+    spect: "16 / 9",
     title: "Papaya Turn One", role: "Co-Founder / Director", period: "2021 — 2025",
     body: [
       "Co-founded a small motorsport media company and racing team, grown from the QE Motorsport society. Directed brand identity, media output, and early operational strategy.",
@@ -656,7 +663,7 @@ function WorkCanvas({ projects, onOpenProject }) {
             <button key={p.id} type="button" className={`canvas-tile ${p.featured ? "featured" : ""}`}
               style={{ left: `${p.canvasX}px`, top: `${p.canvasY}px`, transform: "translate(-50%, -50%)" }}
               onClick={() => onOpenProject(p)} aria-label={`Open project: ${p.title}`}>
-              <div className="tile-image"><img src={p.image} alt="" /></div>
+              <div className="tile-image"><img src={p.image} alt="" style={{ "--aspect": w.aspect }}/></div>
               <div className="tile-content">
                 <div className="tile-meta"><span className="id">N°{p.id}</span><span>{p.period}</span></div>
                 <h3>{p.title}</h3>
