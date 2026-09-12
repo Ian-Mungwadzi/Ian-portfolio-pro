@@ -186,11 +186,29 @@ h1, h2, h3, h4, h5 { font-family: var(--display); font-weight: 600; letter-spaci
 .canvas-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px; }
 .canvas-caption { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); text-transform: uppercase; }
 .canvas-caption .k { color: var(--accent); }
-.canvas-viewport { position: relative; width: 100%; height: 720px; border: 1px solid var(--rule-strong); overflow: hidden; background: var(--bg-alt); cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; }
-.canvas-viewport.grabbing { cursor: grabbing; }
+.canvas-viewport{
+  position: relative;
+  width: 100%;
+  height: 720px;
+  border: 1px solid var(--rule-strong);
+  overflow: hidden;
+  background-color: var(--bg-alt);
+  background-image:
+    linear-gradient(rgba(240,237,229,0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240,237,229,0.09) 1px, transparent 1px),
+    linear-gradient(rgba(240,237,229,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240,237,229,0.04) 1px, transparent 1px);
+  background-size: 240px 240px, 240px 240px, 48px 48px, 48px 48px;
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+    }
+.canvas-viewport.grabbing {
+  cursor: grabbing; }
 @media (max-width: 900px) { .canvas-viewport { height: 620px; } }
 @media (max-width: 620px) { .canvas-viewport { height: 520px; } }
-.canvas-plane { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform-origin: 0 0; will-change: transform; background-image: linear-gradient(rgba(240,237,229,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(240,237,229,0.09) 1px, transparent 1px), linear-gradient(rgba(240,237,229,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(240,237,229,0.04) 1px, transparent 1px); background-size: 240px 240px, 240px 240px, 48px 48px, 48px 48px; background-position: 0 0; }
+.canvas-plane { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform-origin: 0 0; will-change: transform; }
 .canvas-origin { position: absolute; left: 0; top: 0; width: 20px; height: 20px; border-left: 1px solid rgba(229,101,28,0.5); border-top: 1px solid rgba(229,101,28,0.5); pointer-events: none; }
 .canvas-origin::after { content: '0,0'; position: absolute; top: 4px; left: 6px; font-family: var(--mono); font-size: 9px; color: rgba(229,101,28,0.7); letter-spacing: 0.1em; }
 .canvas-tile { position: absolute; background: var(--bg-elev); border: 1px solid var(--rule-strong); padding: 0; cursor: pointer; text-align: left; color: var(--ink); font-family: var(--body); transition: border-color 0.2s ease, box-shadow 0.2s ease; width: 340px; overflow: hidden; opacity: 0; will-change: transform, opacity; }
@@ -427,7 +445,7 @@ const WORK = [
   {
     id: "02", image: "/images/rap-riders.jpg",
     canvasX: 620, canvasY: -80,
-    aspect: "16 / 9",
+    aspect: "1 / 1",
     title: "RAP Riders Academy", role: "Pit Crew / Race Engineer", period: "2024",
     body: [
       "Supported rider Hudson Kai Cooper across the Teesside legs of the FIM MiniGP and FreeTech Endurance Junior Talent Cup.",
