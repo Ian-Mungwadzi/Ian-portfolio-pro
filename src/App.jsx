@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ============================================================
    IAN MUNGWADZI — PORTFOLIO 
-   Includes live "In progress" section for Project ARGO.
+   Now includes live "In progress" section for Project ARGO.
    ============================================================ */
 
 const CSS = `
@@ -408,7 +408,7 @@ h1, h2, h3, h4, h5 { font-family: var(--display); font-weight: 600; letter-spaci
 
 const ABOUT = [
   "I'm a final-year Mechanical Engineering student at Northumbria University and former Team Principal of the university's debut Formula Student programme. My work sits at the intersection of engineering design, race-side data analysis, and multidisciplinary team leadership.",
-  "I'm most at home between simulation and physical validation — CAD in SolidWorks and Fusion 360, structural work in ABAQUS, data pipelines in Python and MATLAB, and setup decisions made at the trackside with telemetry in front of me.",
+  "I'm most at home doing simulation and physical validation — CAD in SolidWorks and Fusion 360, structural work in ABAQUS, data pipelines in Python and MATLAB, and setup decisions made at the trackside with telemetry in front of me.",
   "Targeting graduate engineering roles for the 2027 intake. Based in Newcastle-upon-Tyne, open to relocating.",
 ];
 
@@ -663,7 +663,9 @@ function WorkCanvas({ projects, onOpenProject }) {
             <button key={p.id} type="button" className={`canvas-tile ${p.featured ? "featured" : ""}`}
               style={{ left: `${p.canvasX}px`, top: `${p.canvasY}px`, transform: "translate(-50%, -50%)" }}
               onClick={() => onOpenProject(p)} aria-label={`Open project: ${p.title}`}>
-              <div className="tile-image"><img src={p.image} alt="" style={{ "--aspect": w.aspect }}/></div>
+              <div className="tile-image" style={{ "--aspect": p.aspect }}>
+                <img src={p.image} alt="" />
+              </div>
               <div className="tile-content">
                 <div className="tile-meta"><span className="id">N°{p.id}</span><span>{p.period}</span></div>
                 <h3>{p.title}</h3>
@@ -989,7 +991,7 @@ export default function Portfolio() {
                 </h1>
                 <p className="role">
                   <strong>Mechanical engineering</strong>, final year at Northumbria University.
-                  Team Principal of Northumbria's debut Formula Student programme. Design, simulation,
+                  FormerTeam Principal of Northumbria's debut Formula Student programme. Design, simulation,
                   and race-side data analysis.
                 </p>
                 <div className="meta">
